@@ -1,0 +1,21 @@
+{
+    "name": "adam-innes/alpha-hue",
+    "description": "PHP SDK for interacting with Phillips Hue lights.",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Adam Innes",
+            "email": "code@adaminnes.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "adam-innes/php-rest-client": "~1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AlphaHue\\": "src/"
+        }
+    }
+}
