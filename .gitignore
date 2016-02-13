@@ -1,3 +1,4 @@
+*.swp
 app.inc
 composer.lock
 composer.phar
