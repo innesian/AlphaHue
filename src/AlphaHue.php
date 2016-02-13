@@ -8,6 +8,29 @@ class AlphaHue
     /** @var string $bridge_username Username registered with bridge. **/
     public $bridge_username = '';
 
+    /** @var array $room_classes Allowed room classes for Groups of the type 'Room'. **/
+    public $room_classes = array(
+        'Living room',
+        'Kitchen',
+        'Dining',
+        'Bedroom',
+        'Kids Bedroom',
+        'Bathroom',
+        'Nursery',
+        'Recreation',
+        'Office',
+        'Gym',
+        'Hallway',
+        'Toilet',
+        'Front Door',
+        'Garage',
+        'Terrace',
+        'Garden',
+        'Driveway',
+        'Carport',
+        'Other'
+    );
+
     /**
      * Initializes class with Bridge Address and Username.
      *
@@ -26,8 +49,7 @@ class AlphaHue
         // Initialize the Rest Client.
         $this->rest = new \PhpRestClient\PhpRestClient("http://{$bridge_address}/api/{$bridge_username}");
 
-        // Test the connection.
-        // todo: make a test call to test the connection.
+        $this->getConfiguration();
     }
     
     /**
@@ -42,12 +64,20 @@ class AlphaHue
      * @param $bridge_address
      * @param $app_name
      * @param $device_name
+     *
+     * @return mixed Array response from the server or false on failure.
      */
     public static function authorize($bridge_address, $app_name='AlphaHue', $device_name='myServer')
     {
         $rest = new \PhpRestClient\PhpRestClient("http://{$bridge_address}/api");
         $response = $rest->post('', json_encode('devicetype'=>"{$app_name}:{$device_name}"));
         return $response;
+    }
+
+    public function getConfiguration()
+    {
+        $response = $this->rest('config');
+        $this->config = $response;
     }
 
     /**
@@ -86,13 +116,75 @@ class AlphaHue
     public function getLightOnStatus($light_id)
     {
         $response = $this->rest->get("lights/{$light_id}");
-        // todo: Check state.
         return $response['state']['on'];
     }
 
-    public function bridgeState()
+    /**
+     * Get all Group IDs associated to the Bridge.
+     *
+     * @return mixed Array of Groups or false on failure. 
+     */
+    public function getGroups()
     {
-
+        $response = $this->rest->get('groups');
+        return $response;
     }
 
+    /**
+     * Creates a group with the provided name, type and lights.
+     *
+     * @param string $name   Group name.
+     * @param string $type   LightGroup or Room.
+     * @param array  $lights Array of Light IDs assigned to the Group.
+     *
+     */
+    public function createGroup($name, $type='LightGroup', array $lights)
+    {
+        $params['name'] = $name;
+
+        /**
+         * Options for $type are currently limited to LightGroup and Room.
+         *
+         * LightGroup and Room are similar except for the following:
+         * 1: Room groups can contain 0 lights.
+         * 2: A light can be in only 1 Room group.
+         * 3: A Room isn't automatically deleted when all lights in it are.
+         *
+         * @see http://developers.meethue.com/documentation/groups-api#21_get_all_groups
+         */
+        $params['type'] = $type;
+        $params['lights'] = $lights;
+
+        $response = $this->rest->post('groups', json_encode($params));
+        return $response;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
