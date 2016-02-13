@@ -1,6 +1,6 @@
 {
     "name": "adam-innes/alpha-hue",
-    "description": "PHP SDK for interacting with Phillips Hue lights.",
+    "description": "PHP SDK for interacting with the Phillips Hue Go Lighting System.",
     "minimum-stability": "stable",
     "license": "MIT",
     "authors": [
@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "adam-innes/php-rest-client": "~1.0"
+        "adam-innes/php-rest-client": ">=1.0.0"
     },
     "autoload": {
         "psr-4": {
