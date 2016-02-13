@@ -1,3 +1,4 @@
+app.inc
 composer.lock
 composer.phar
 vendor/*
