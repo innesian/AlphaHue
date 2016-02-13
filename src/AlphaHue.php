@@ -70,28 +70,51 @@ class AlphaHue
     public static function authorize($bridge_address, $app_name='AlphaHue', $device_name='myServer')
     {
         $rest = new \PhpRestClient\PhpRestClient("http://{$bridge_address}/api");
-        $response = $rest->post('', json_encode('devicetype'=>"{$app_name}:{$device_name}"));
+        $response = $rest->post('', json_encode(array('devicetype'=>"{$app_name}:{$device_name}")));
         return $response;
     }
 
+    /**
+     * Saves the Bridge configuration settings.
+     *
+     * @return void
+     */
     public function getConfiguration()
     {
-        $response = $this->rest('config');
+        $response = $this->rest->get('config');
         $this->config = $response;
+    }
+
+    /**
+     * Checks compatibility of current API version against min and max versions.
+     *
+     * @param string $min_version Min acceptable version for compatibility to be true. Formatted x.x.x
+     * @param string $max_version Max acceptable version for compatibility to be true. Formatted x.x.x
+     *
+     * @return bool True if compatible with parameters, false if not.
+     */
+    public function compatible($min_version, $max_version=false)
+    {
+        $compatible = false;
+        $compatible = version_compare($this->config['apiversion'], $min_version, '>=');
+        if ($compatible && $max_version) {
+            $compatible = version_compare($this->config['apiversion'], $max_version, '<=');
+        }
+        return $compatible;
     }
 
     /**
      * Turns a light On or Off depending on Light ID.
      *
      * @param int    $light_id    ID number of the light attached to the Bridge.
-     * @param string $light_state 'On' or 'Off' turns the light on or off. Defaults to 'On'.
+     * @param string $light_state 'on' or 'off' turns the light on or off. Defaults to 'on'.
      *
      * @return void
      */
     public function setLightOnStatus($light_id, $light_state='on')
     {
-        $light_state = ('on' == $light_state); // On=true, Off=false
-        $response = $this->rest("lights/{$lightId}/state", json_encode(array('on'=>$light_state)));
+        $light_state = ('on' == $light_state); // on=true, off=false
+        $response = $this->rest->put("lights/{$light_id}/state", json_encode(array('on'=>$light_state)));
         return $response;
     }
 
@@ -100,7 +123,7 @@ class AlphaHue
      * 
      * @return mixed Array of light IDs or boolean false on failure.
      */
-    public function getLightsIds()
+    public function getLightIds()
     {
         $response = $this->rest->get('lights');
         return array_keys($response);
@@ -134,57 +157,56 @@ class AlphaHue
      * Creates a group with the provided name, type and lights.
      *
      * @param string $name   Group name.
-     * @param string $type   LightGroup or Room.
      * @param array  $lights Array of Light IDs assigned to the Group.
+     * @param string $type   'LightGroup' or 'Room'.
      *
      */
-    public function createGroup($name, $type='LightGroup', array $lights)
+    public function createGroup($name, array $lights, $type='LightGroup', $room_class='Other')
     {
         $params['name'] = $name;
 
-        /**
-         * Options for $type are currently limited to LightGroup and Room.
-         *
-         * LightGroup and Room are similar except for the following:
-         * 1: Room groups can contain 0 lights.
-         * 2: A light can be in only 1 Room group.
-         * 3: A Room isn't automatically deleted when all lights in it are.
-         *
-         * @see http://developers.meethue.com/documentation/groups-api#21_get_all_groups
-         */
-        $params['type'] = $type;
-        $params['lights'] = $lights;
+        if ($this->compatible('1.11.0')) {
+            /**
+             * Options for creating Group $type are currently limited to LightGroup and Room.
+             *
+             * Note: Room is also only an option for API v>=1.11
+             *
+             * LightGroup and Room are similar except for the following:
+             * 1: Room groups can contain 0 lights.
+             * 2: A light can be in only 1 Room group.
+             * 3: A Room isn't automatically deleted when all lights in it are.
+             *
+             * Created Room groups are given a default Room Class of 'Other' unless specified,
+             * There is a set list of acceptable Room Classes. 
+             *
+             * @see AlphaHue::$room_classes for list of acceptable classes.
+             * @see http://developers.meethue.com/documentation/groups-api#21_get_all_groups
+             */
+            $params['type'] = ('Room' == $type) ? 'Room' : 'LightGroup';
+
+            if ('Room' == $type) {
+                // Validate that the Room class in an accepted value, if not, default to 'Other'.
+                $params['room_class'] = in_array($room_class, $this->room_classes) ? $room_class : 'Other';
+            }
+        }
+
+        // Make sure the light IDs are sent over as strings or the API with throw an error.
+        $params['lights'] = array_map('strval', $lights);
 
         $response = $this->rest->post('groups', json_encode($params));
         return $response;
     }
+
+    /**
+     * Gets the name, light memembership and last command for a given group.
+     * 
+     * @param int $group_id Group ID number.
+     *
+     * @return mixed Array of attributes on success, false on failure.
+     */
+    public function getGroupAttributes($group_id)
+    {
+        $response = $this->rest->get("groups/{$group_id}");
+        return $response;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
