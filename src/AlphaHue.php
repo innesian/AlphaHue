@@ -160,6 +160,7 @@ class AlphaHue
      * @param array  $lights Array of Light IDs assigned to the Group.
      * @param string $type   'LightGroup' or 'Room'.
      *
+     * @return mixed Array response on success, false on failure.
      */
     public function createGroup($name, array $lights, $type='LightGroup', $room_class='Other')
     {
@@ -198,15 +199,105 @@ class AlphaHue
     }
 
     /**
-     * Gets the name, light memembership and last command for a given group.
-     * 
-     * @param int $group_id Group ID number.
+     * Modifies the name, light and class memembership of a group.
      *
-     * @return mixed Array of attributes on success, false on failure.
+     * @param int   $group_id   Group ID number. Group 0 refers to all lights.
+     * @param array $attributes {
+     *     @var string $name   The new name for the Group.
+     *     @var array  $lights IDs of the lights that should be in the group.
+     *     @var string $class  (required v>1.11) Category of the Room type.
+     * }
+     *
+     * @return mixed Confirmation array on success.
      */
-    public function getGroupAttributes($group_id)
+    public function setGroupAttributes($group_id, $attributes)
     {
-        $response = $this->rest->get("groups/{$group_id}");
+        $response = $this->rest->put("groups/{$group_id}", json_encode($attributes));
         return $response;
     }
+
+    /**
+     * Deletes a Group.
+     *
+     * @param int $group_id Group ID number.
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function deleteGroup($group_id)
+    {
+        $response = $this->rest->delete("groups/{$group_id}");
+        return $response;
+    }
+
+    /**
+     * Modifies the state of all lights in a group.
+     *
+     * @param int   $group_id Group ID number. Group 0 refers to all lights.
+     * @param array $attributes { // All attributes are optional.
+     *     @var bool   $on      On/Off state of the light. True=On, False=Off.
+     *     @var int    $bri     The brightness value to set the light to. (0 to 60).
+     *     @var int    $hue     The hue value to set light to. (0 to 65535).  
+     *     @var int    $sat     Saturation of the light. 254 is most saturated (colored) 0 is white.
+     *     @var float  $xy      [x,y] coordinates of a color in CIE color space.
+     *     @var int    $ct      The Mired Color temperature of the light. (153 to 500).
+     *     @var string $alert   One of three values.
+     *                          "none"    The light is not performing an alert effect.
+     *                          "select"  The light is performing on breathe cycle.
+     *                          "lselect" The light is performing breathe cycles for 15 seconds or
+     *                                    until a "none" alert is sent.
+     *     @var string $effect  The dynamic effect of the light, "none" and "colorloop" are supported.
+     *     @var int    $bri_inc Increments/Decrements the brightness (1.7+ Ignored if $bri passed). (-254 to 254).
+     *     @var int    $sat_inc Increments/Decrements the saturation (1.7+ Ignored if $sat passed). (-254 to 254).
+     *     @var int    $hue_inc Increments/Decrements the hue (1.7+ Ignored if $hue passed). (-254 to 254).
+     *     @var int    $ct_int  Increments/Decrements the value of the ct (1.7+ Ignored if $ct passed) (-65534 to 65534).
+     *     @var int    $xy_inc  Increments/Decrements the value of xy (1.7+ Ignored if $xy passed) (-0.5 to 0.5).
+     *     @var string $scene   Scene identifier.
+     *     @var int    $transitiontime The duration of the transition. (Multiples of 100ms).
+     * }
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function setGroupState($group_id, $state)
+    {
+        $response = $this->rest->put("groups/{$group_id}/action", json_encode($state));
+        return $response;
+    }
+
+    /**
+     * Gets a list of all sensors that have been added to the Bridge.
+     *
+     * @return mixed Array of sensor information.
+     */
+    public function getSensors()
+    {
+        $response = $this->rest->get("sensors");
+        return $response;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
