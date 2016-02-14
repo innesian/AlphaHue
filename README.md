@@ -1,11 +1,13 @@
 # AlphaHue; Phillips Hue PHP SDK
 ## Synopsis
-This is a quick-to-implement library that connects your PHP project to the Phillips Hue lighting system. 
+This is a quick-to-implement library that connects your PHP project to the Phillips Hue lighting system. When I started writing an app for the Hue I found a need for an SDK that was complete and uncomplex with decent documentation. AlphaHue is an attempt to fill that need and speed up the process of getting started.
+
+AlphaHue uses the [PhpRestClient](https://github.com/innesian/PhpRestClient) to interact with the Hue APIs.
 ## Setup
 ### Installation with Composer.
 Clone the repository.
 ```
-$ git clone https://github.com/innesian/PhpRestClient.git
+$ git clone https://github.com/innesian/AlphaHue.git
 ```
 Install Composer in your project using cURL (command below) or [download the composer.phar directly](http://getcomposer.org/composer.phar).
 ```
@@ -26,12 +28,12 @@ $bridge_username = 'xxxxxxxxxxx';
 
 $hue = new \AlphaHue\AlphaHue($bridge_hostname, $bridge_username);
 ```
-### (or) add PhpRestClient as a dependency to your Hue project using Composer.
+### (or) add AlphaHue as a dependency to your Hue project using Composer.
 Create a *composer.json* file in your project and add `adam-innes/php-rest-client` as a required dependency.
 ```
 {
     "require": {
-        "adam-innes/php-rest-client": ">=1.0.0"
+        "adam-innes/alpha-hue": ">=1.0.0"
     }
 }
 ```
