@@ -86,6 +86,17 @@ class AlphaHue
     }
 
     /**
+     * Lists all supported Bridge timezones.
+     *
+     * @return mixed Array of supported timezones on success.
+     */
+    public function getTimezones()
+    {
+        $response = $this->rest->get('info/timezones');
+        return $response;
+    }
+
+    /**
      * Checks compatibility of current API version against min and max versions.
      *
      * @param string $min_version Min acceptable version for compatibility to be true. Formatted x.x.x
@@ -111,7 +122,7 @@ class AlphaHue
      *
      * @return void
      */
-    public function setLightOnStatus($light_id, $light_state='on')
+    public function togglePower($light_id, $light_state='on')
     {
         $light_state = ('on' == $light_state); // on=true, off=false
         $response = $this->rest->put("lights/{$light_id}/state", json_encode(array('on'=>$light_state)));
@@ -140,6 +151,93 @@ class AlphaHue
     {
         $response = $this->rest->get("lights/{$light_id}");
         return $response['state']['on'];
+    }
+
+    /**
+     * Gets the attributes and state of a given light.
+     *
+     * @param int $light_id Light Identifier.
+     *
+     * @return mixed Array of state data on success.
+     */
+    public function getLightState($light_id)
+    {
+        $response = $this->rest->get("lights/{$light_id}");
+        return $response;
+    }
+
+    /**
+     * Modifies the state of a specified light.
+     *
+     * @param int   $light_id   Light Identifier. 
+     * @param array $attributes { // All attributes are optional.
+     *     @var bool   $on      On/Off state of the light. True=On, False=Off.
+     *     @var int    $bri     The brightness value to set the light to. (0 to 60).
+     *     @var int    $hue     The hue value to set light to. (0 to 65535).
+     *     @var int    $sat     Saturation of the light. 254 is most saturated (colored) 0 is white.
+     *     @var float  $xy      [x,y] coordinates of a color in CIE color space.
+     *     @var int    $ct      The Mired Color temperature of the light. (153 to 500).
+     *     @var string $alert   One of three values.
+     *                          "none"    The light is not performing an alert effect.
+     *                          "select"  The light is performing on breathe cycle.
+     *                          "lselect" The light is performing breathe cycles for 15 seconds or
+     *                                    until a "none" alert is sent.
+     *     @var string $effect  The dynamic effect of the light, "none" and "colorloop" are supported.
+     *     @var int    $bri_inc Increments/Decrements the brightness (1.7+ Ignored if $bri passed). (-254 to 254).
+     *     @var int    $sat_inc Increments/Decrements the saturation (1.7+ Ignored if $sat passed). (-254 to 254).
+     *     @var int    $hue_inc Increments/Decrements the hue (1.7+ Ignored if $hue passed). (-254 to 254).
+     *     @var int    $ct_int  Increments/Decrements the value of the ct (1.7+ Ignored if $ct passed) (-65534 to 65534).
+     *     @var int    $xy_inc  Increments/Decrements the value of xy (1.7+ Ignored if $xy passed) (-0.5 to 0.5).
+     *     @var string $scene   Scene identifier.
+     *     @var int    $transitiontime The duration of the transition. (Multiples of 100ms).
+     * }
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function setLightState($light_id, $state)
+    {
+        $response = $this->rest->put("lights/{$group_id}/state", json_encode($state));
+        return $response;
+    }
+
+    /**
+     * Sets light attributes.
+     *
+     * @param int   $light_id   Light Identifier.
+     * @param array $attributes {
+     *     @var string $name Light name.
+     * }
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function setLightAttributes($light_id, $attributes)
+    {
+        $response = $this->rest->put("lights/{$light_id}", json_encode($attributes));
+        return $response;
+    }
+
+    /**
+     * Deletes a light from the Bridge.
+     *
+     * @param int $light_id Light Identifier.
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function deleteLight($light_id)
+    {
+        $response = $this->rest->delete("lights/{$light_id}");
+        return $response;
+    }
+
+    /**
+     * Searches for new lights (v>=1.1 new switches).
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function searchNewDevices()
+    {
+        $response = $this->rest->post('lights');
+        return $response;
     }
 
     /**
@@ -232,7 +330,7 @@ class AlphaHue
     /**
      * Modifies the state of all lights in a group.
      *
-     * @param int   $group_id Group ID number. Group 0 refers to all lights.
+     * @param int   $group_id   Group ID number. Group 0 refers to all lights.
      * @param array $attributes { // All attributes are optional.
      *     @var bool   $on      On/Off state of the light. True=On, False=Off.
      *     @var int    $bri     The brightness value to set the light to. (0 to 60).
@@ -273,31 +371,4 @@ class AlphaHue
         $response = $this->rest->get("sensors");
         return $response;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
