@@ -48,3 +48,37 @@ If you're connecting to your bridge from an external server you may need to forw
 * *Step 1*: [Determine the internal IP address of your Bridge](http://www.meethue.com/api/nupnp).
 * *Step 2*: [Forward an unused port to the internal IP address of the Bridge](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide/)
 * After forwarding (for example, port 24055, to the Bridge) your *Bridge Hostname* would be [yourIpAddress:24055](https://www.google.com/search?q=what+is+my+ip&oq=what+is+my+ip)
+## Usage
+#### Lights API
+Turn lights on/off.
+```php
+// Get all light IDs.
+$light_ids = $hue->getLightIds();
+
+// Turning lights on by ID.
+foreach ($light_ids as $light_id) {
+    $hue->togglePower($light_id, 'on');
+}
+
+// Turning lights off by ID.
+foreach ($light_ids as $light_id) {
+    $hue->togglePower($light_id, 'off');
+}
+```
+Get the power status of a light by ID.
+```php
+$powered_on = $hue->getLightOnStatus($light_id); // True if on, false if off.
+```
+Delete a light from the Bridge.
+```php
+$hue->deleteLight($light_id);
+```
+
+#### Bridge Configuration Information
+```php
+$hue->config['name']; // Bridge Name.
+$hue->config['apiversion']; // Bridge API Version.
+$hue->config['ipaddress']; // Bridge IP Address
+```
+#### 
+
