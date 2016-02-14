@@ -1,5 +1,4 @@
-# AlphaHue; A simple PHP SDK for the Phillips Hue API
-
+# AlphaHue; Phillips Hue PHP SDK
 ## Synopsis
 This is a quick-to-implement library that connects your PHP project to the Phillips Hue lighting system. 
 ## Setup
@@ -46,6 +45,4 @@ Create a *composer.json* file in your project and add `adam-innes/php-rest-clien
 If you're connecting to your bridge from an external server you may need to forward a port via your router.
 * *Step 1*: [Determine the internal IP address of your Bridge](http://www.meethue.com/api/nupnp).
 * *Step 2*: [Forward an unused port to the internal IP address of the Bridge](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide/)
-* After forwarding (for example, port 24055, to the Bridge) your *Bridge Hostname* would be [<yourIpAddress>:24055](https://www.google.com/search?q=what+is+my+ip&oq=what+is+my+ip)
-
-
+* After forwarding (for example, port 24055, to the Bridge) your *Bridge Hostname* would be [yourIpAddress:24055](https://www.google.com/search?q=what+is+my+ip&oq=what+is+my+ip)
