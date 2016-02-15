@@ -29,7 +29,7 @@ $bridge_username = 'xxxxxxxxxxx';
 $hue = new \AlphaHue\AlphaHue($bridge_hostname, $bridge_username);
 ```
 ### (or) add AlphaHue as a dependency to your Hue project using Composer.
-Create a *composer.json* file in your project and add `adam-innes/php-rest-client` as a required dependency.
+Create a *composer.json* file in your project and add `adam-innes/alpha-hue` as a required dependency.
 ```
 {
     "require": {
