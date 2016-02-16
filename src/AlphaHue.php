@@ -387,12 +387,36 @@ class AlphaHue
      * Returns a rule object with id matching <id> or an error 3 if <id> is not available.
      *
      * @param int $rule_id Rule Identifier.
+     *
+     * @return mixed Confirmation array on success.
      */
     public function getRule($rule_id)
     {
         $reponse = $this->rest->get("rules/{$rule_id}");
         return $response;
     }  
+
+    /**
+     * Delete a rule with specified ID.
+     *
+     * @param mixed $rule_id Rule Indentifier.
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function deleteRule($rule_id)
+    {
+        $response = $this->rest->get("rules/{$rule_id}");
+        return $response;
+    }
+
+    public function createRule() {}
+    public function updateRule() {}
+
+    public function getSchedules() {}
+    public function createSchedule() {}
+    public function getScheduleAttributes() {}
+    public function setScheduleAttributes() {}
+    public function deleteSchedule() {}
 
 
 }
