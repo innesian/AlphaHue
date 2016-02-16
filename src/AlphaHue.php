@@ -368,7 +368,43 @@ class AlphaHue
      */
     public function getSensors()
     {
-        $response = $this->rest->get("sensors");
+        $response = $this->rest->get('sensors');
         return $response;
     }
+
+    /**
+     * Gets a list of all rules that are in the bridge.
+     *
+     * @return mixed Array of rules.
+     */
+    public function getRules()
+    {
+        $response = $this->rest->get('rules');
+        return $response;
+    }
+
+    /**
+     * Returns a rule object with id matching <id> or an error 3 if <id> is not available.
+     *
+     * @param int $rule_id Rule Identifier.
+     */
+    public function getRule($rule_id)
+    {
+        $reponse = $this->rest->get("rules/{$rule_id}");
+        return $response;
+    }  
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
