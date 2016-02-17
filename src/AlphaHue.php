@@ -426,21 +426,21 @@ class AlphaHue
     /**
      * Allows the user to create new schedules. The bridge can store up to 100 schedules.
      *
-     * @param array arguments {
+     * @param array $attributes {
      *     @var string $name        Name for the new schedule. Defaults to 'schedule'.
      *     @var string $description Description of the new schedule. Defaults to empty.
      *     @var object $command     Command to execute when the scheduled event occurs.
      *     @var string $time        Time when the scheduled event will occur. Time is measured in
      *                              UTC time. Either time or localtime has to be provided.
      *     @var string $localtime   Local time when the scheduled event will occur.
-     *     @var string $status     'enabled' or 'disabled'.
-     *     @var bool   $autodelete If set to true, the schedule will be removed automatically if
-     *                             expired, if set to false it will be disabled.
+     *     @var string $status      'enabled' or 'disabled'.
+     *     @var bool   $autodelete  If set to true, the schedule will be removed automatically if
+     *                              expired, if set to false it will be disabled.
      * }
      *
      * @return mixed Confirmation array on success.
      */
-    public function createSchedule($arguments)
+    public function createSchedule($attributes)
     {
         /**
          * $arguments['command']->address; Path to light resource, a group resource or any other
@@ -449,12 +449,54 @@ class AlphaHue
          *                                 Either 'POST', 'PUT', 'DELETE' for local addresses.
          * $arguments['command']->body;    JSON string to be sent to the relevant resource.
          */
-        $response = $this->rest->post("schedules", $arguments);
+        $response = $this->rest->post("schedules", $attributes);
         return $response;
     }
 
-    public function getScheduleAttributes() {}
-    public function setScheduleAttributes() {}
+    /**
+     * Gets all attributes for a schedule.
+     *
+     * @param int $schedule_id Schedule Identifier.
+     * 
+     * @see AlphaHue::createScehdule() Attributes array in documentation is same as response.
+     *
+     * @return mixed Attribute array on succcess.
+     */
+    public function getSchedule($schedule_id)
+    {
+        $response = $this->rest->get("schedules/{$schedule_id}");
+        return $response;
+    }
+
+    /**
+     * Allows the user to create new schedules. The bridge can store up to 100 schedules.
+     *
+     * @param array $attributes {
+     *     @var string $name        Name for the new schedule. Defaults to 'schedule'.
+     *     @var string $description Description of the new schedule. Defaults to empty.
+     *     @var object $command     Command to execute when the scheduled event occurs.
+     *     @var string $time        Time when the scheduled event will occur. Time is measured in
+     *                              UTC time. Either time or localtime has to be provided.
+     *     @var string $localtime   Local time when the scheduled event will occur.
+     *     @var string $status      'enabled' or 'disabled'.
+     *     @var bool   $autodelete  If set to true, the schedule will be removed automatically if
+     *                              expired, if set to false it will be disabled.
+     * }
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function setSchedule($schedule_id, $attributes)
+    {
+        /**
+         * $arguments['command']->address; Path to light resource, a group resource or any other
+         *                                 bridge resources.
+         * $arguments['command']->method;  The HTTP method to send the body to the given address.
+         *                                 Either 'POST', 'PUT', 'DELETE' for local addresses.
+         * $arguments['command']->body;    JSON string to be sent to the relevant resource.
+         */
+        $response = $this->rest->post("schedules", $attributes);
+        return $response;
+    }
 
     /**
      * Deletes a schedule from the bridge.
