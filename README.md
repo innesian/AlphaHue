@@ -43,14 +43,6 @@ Create a *composer.json* file in your project and add `adam-innes/alpha-hue` as 
 * Get the internal IP address from your router -or- use the [broker service](http://www.meethue.com/api/nupnp).
 * Follow the directions on obtaining a username from the [documentation](http://www.developers.meethue.com/documentation/getting-started).
 
-### Connecting from a remote server
-If you're connecting to your bridge from an external server you may need to forward a port via your router.
-* *Step 1*: [Determine the internal IP address of your Bridge](http://www.meethue.com/api/nupnp).
-* *Step 2*: [Forward an unused port to the internal IP address of the Bridge](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide/)
-* After forwarding (for example, port 24055, to the Bridge) your *Bridge Hostname* would be [yourIpAddress:24055](https://www.google.com/search?q=what+is+my+ip&oq=what+is+my+ip)
-
-## Usage
-
 #### Lights API
 Turn lights on/off.
 ```php
