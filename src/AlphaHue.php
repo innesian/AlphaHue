@@ -409,7 +409,39 @@ class AlphaHue
         return $response;
     }
 
-    public function createRule() {}
+    /**
+     * Creates a new rule.
+     *
+     * Creates a new rule in the bridge rule engine. A rule must contain at least 1 condition (max 8) 
+     * and at least 1 action (max 8). All conditions must evaluate to true for the action to be performed.
+     *
+     * @param string $name      Rule name.
+     * @param array $conditions {
+     *     @var string $address  Path to an attribute of a sensor resource.
+     *     @var string $operator eq, gt, lt, dx (equals, greater than, less than or value has changed). 
+     *     @var string $value    The resource attribute is compared to this value using the given operator.
+     *                           The value is cast to the data type of the resource attribute.
+     * }
+     * @param array $action {
+     *     @var string $address  Path to an attribute of a sensor resource.
+     *     @var string $method   The HTTP method used to send the body to the given address POST,PUT,DELETE for
+     *                           local addresses. 
+     *     @var string $body     JSON string to be sent to the relevant resource. 
+     * }
+     *
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function createRule($name, $conditions, $action)
+    {
+        $params['name'] = $name;
+        $params['conditions'] = $conditions;
+        $params['actions'] = $actions;
+
+        $response = $this->rest->post('rules', $params);
+        return $response;
+    }
+
     public function updateRule() {}
 
     /**
