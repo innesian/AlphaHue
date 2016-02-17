@@ -412,23 +412,58 @@ class AlphaHue
     public function createRule() {}
     public function updateRule() {}
 
-    public function getSchedules() {}
-    public function createSchedule() {}
+    /**
+     * Gets a list of all schedules that have been added to the bridge.
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function getSchedules() 
+    {
+        $response = $this->rest->get("schedules");
+        return $response;
+    }
+
+    /**
+     * Allows the user to create new schedules. The bridge can store up to 100 schedules.
+     *
+     * @param array arguments {
+     *     @var string $name        Name for the new schedule. Defaults to 'schedule'.
+     *     @var string $description Description of the new schedule. Defaults to empty.
+     *     @var object $command     Command to execute when the scheduled event occurs.
+     *     @var string $time        Time when the scheduled event will occur. Time is measured in
+     *                              UTC time. Either time or localtime has to be provided.
+     *     @var string $localtime   Local time when the scheduled event will occur.
+     *     @var string $status     'enabled' or 'disabled'.
+     *     @var bool   $autodelete If set to true, the schedule will be removed automatically if
+     *                             expired, if set to false it will be disabled.
+     * }
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function createSchedule($arguments)
+    {
+        /**
+         * $arguments['command']->address; Path to light resource, a group resource or any other
+         *                                 bridge resources.
+         * $arguments['command']->method;  The HTTP method to send the body to the given address.
+         *                                 Either 'POST', 'PUT', 'DELETE' for local addresses.
+         * $arguments['command']->body;    JSON string to be sent to the relevant resource.
+         */
+        $response = $this->rest->post("schedules", $arguments);
+        return $response;
+    }
+
     public function getScheduleAttributes() {}
     public function setScheduleAttributes() {}
-    public function deleteSchedule() {}
 
-
+    /**
+     * Deletes a schedule from the bridge.
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function deleteSchedule()
+    {
+        $response = $this->rest->delete("schedules/{$schedule_id}");
+        return $response;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
