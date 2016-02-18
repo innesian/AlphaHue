@@ -203,6 +203,21 @@ class AlphaHue
     }
 
     /**
+     * Changes a light to a color by Hex color value.
+     *
+     * @param int $light_id Light Identifier.
+     * @param string $hex Hex string.
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function setLightToHex($light_id, $hex)
+    {
+        $xy = getXYPointFromHex($hex);
+        $response = $this->setLightState($light_id, array('xy'=>$xy));
+        return $response;
+    }
+
+    /**
      * Sets light attributes.
      *
      * @param int   $light_id   Light Identifier.

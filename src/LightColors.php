@@ -2,7 +2,6 @@
 
 trait LightColors
 {
-
     /**
      * Get XY from Red, Blue, Green value.
      *
@@ -28,13 +27,24 @@ trait LightColors
     {
         $hex = ltrim($hex, '#');
 
-        list($r,$g,$b) = str_split($hex, 2);
+        list($rgb['red'], $rgb['green'], $rgb['blue']) = str_split($hex, 2);
 
-        $rgb['red']   = hexdec($r);
-        $rgb['green'] = hexdec($g);
-        $rgb['blue']  = hexdec($b);
+        $rgb = array_map('hexdec', $rgb);
 
         return $rgb;
+    }
+
+    /**
+     * Get XY Point from Hex.
+     *
+     * @param string $hex Hex string.
+     *
+     * @return array XY point.
+     */
+    function getXYPointFromHex($hex)
+    {
+        $rgb = hexToRGB($hex);
+        return getXYPointFromRGB($rgb);
     }
 
     /**
@@ -43,6 +53,8 @@ trait LightColors
      * @param int $red   Integer between 0 and 255.
      * @param int $green Integer between 0 and 255.
      * @param int $blue  Integer between 0 and 255.
+     *
+     * @return array Array of xy coordinates.
      */
     function getXYPointFromRGB($rgb)
     {
