@@ -218,6 +218,24 @@ class AlphaHue
     }
 
     /**
+     * Changes a light to a color by RGB values.
+     *
+     * @param array $rgb {
+     *     @var int $red   Red color value (0-255).
+     *     @var int $green Green color value (0-255).
+     *     @var int $blue  Blue color value (0-255).
+     * }
+     *
+     * @return mixed Confirmation array on success.
+     */
+    public function setLightToRGB($light_id, $rgb)
+    {
+        $xy = getXYPointFromRGB($rgb);
+        $response = $this->setLightState($light_id, array('xy'=>$xy));
+        return $response;
+    }
+
+    /**
      * Sets light attributes.
      *
      * @param int   $light_id   Light Identifier.
