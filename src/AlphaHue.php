@@ -2,6 +2,8 @@
 
 class AlphaHue
 {
+    use LightColors;
+
     /** @var string $bridge_address Hostname of the bridge. **/
     public $bridge_address = '';
 
