@@ -198,7 +198,7 @@ class AlphaHue
      */
     public function setLightState($light_id, $state)
     {
-        $response = $this->rest->put("lights/{$group_id}/state", json_encode($state));
+        $response = $this->rest->put("lights/{$light_id}/state", json_encode($state));
         return $response;
     }
 
@@ -212,7 +212,7 @@ class AlphaHue
      */
     public function setLightToHex($light_id, $hex)
     {
-        $xy = getXYPointFromHex($hex);
+        $xy = $this->getXYPointFromHex($hex);
         $response = $this->setLightState($light_id, array('xy'=>$xy));
         return $response;
     }

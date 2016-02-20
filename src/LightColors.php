@@ -9,7 +9,7 @@ trait LightColors
      *
      * @return number 
      */
-    function convertColorToPoint($color)
+    public function convertColorToPoint($color)
     {
         $color = $color < 0   ? 0   : $color;
         $color = $color > 255 ? 255 : $color;
@@ -23,7 +23,7 @@ trait LightColors
      *
      * @return array Array of color values.
      */
-    function hexToRGB($hex)
+    public function hexToRGB($hex)
     {
         $hex = ltrim($hex, '#');
 
@@ -41,10 +41,10 @@ trait LightColors
      *
      * @return array XY point.
      */
-    function getXYPointFromHex($hex)
+    public function getXYPointFromHex($hex)
     {
-        $rgb = hexToRGB($hex);
-        return getXYPointFromRGB($rgb);
+        $rgb = $this->hexToRGB($hex);
+        return $this->getXYPointFromRGB($rgb);
     }
 
     /**
@@ -56,12 +56,12 @@ trait LightColors
      *
      * @return array Array of xy coordinates.
      */
-    function getXYPointFromRGB($rgb)
+    public function getXYPointFromRGB($rgb)
     {
 
-        $rgb['red'] = convertColorToPoint($rgb['red']);
-        $rgb['green'] = convertColorToPoint($rgb['green']);
-        $rgb['blue'] = convertColorToPoint($rgb['blue']);
+        $rgb['red'] = $this->convertColorToPoint($rgb['red']);
+        $rgb['green'] = $this->convertColorToPoint($rgb['green']);
+        $rgb['blue'] = $this->convertColorToPoint($rgb['blue']);
 
         $x = $rgb['red'] * 0.4360747 + $rgb['green'] * 0.3850649 + $rgb['blue'] * 0.0930804;
         $y = $rgb['red'] * 0.2225045 + $rgb['green'] * 0.7168786 + $rgb['blue'] * 0.0406169;
