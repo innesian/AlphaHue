@@ -174,7 +174,7 @@ class AlphaHue
      * @param int   $light_id   Light Identifier. 
      * @param array $attributes { // All attributes are optional.
      *     @var bool   $on      On/Off state of the light. True=On, False=Off.
-     *     @var int    $bri     The brightness value to set the light to. (0 to 60).
+     *     @var int    $bri     The brightness value to set the light to. (0 to 254).
      *     @var int    $hue     The hue value to set light to. (0 to 65535).
      *     @var int    $sat     Saturation of the light. 254 is most saturated (colored) 0 is white.
      *     @var float  $xy      [x,y] coordinates of a color in CIE color space.
@@ -230,7 +230,7 @@ class AlphaHue
      */
     public function setLightToRGB($light_id, $rgb)
     {
-        $xy = getXYPointFromRGB($rgb);
+        $xy = $this->getXYPointFromRGB($rgb);
         $response = $this->setLightState($light_id, array('xy'=>$xy));
         return $response;
     }
@@ -368,7 +368,7 @@ class AlphaHue
      * @param int   $group_id   Group ID number. Group 0 refers to all lights.
      * @param array $attributes { // All attributes are optional.
      *     @var bool   $on      On/Off state of the light. True=On, False=Off.
-     *     @var int    $bri     The brightness value to set the light to. (0 to 60).
+     *     @var int    $bri     The brightness value to set the light to. (0 to 254).
      *     @var int    $hue     The hue value to set light to. (0 to 65535).  
      *     @var int    $sat     Saturation of the light. 254 is most saturated (colored) 0 is white.
      *     @var float  $xy      [x,y] coordinates of a color in CIE color space.
