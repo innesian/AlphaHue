@@ -33,7 +33,7 @@ Create a *composer.json* file in your project and add `adam-innes/alpha-hue` as 
 ```
 {
     "require": {
-        "adam-innes/alpha-hue": ">=1.0.0"
+        "adam-innes/alpha-hue": "1.0.*"
     }
 }
 ```
@@ -66,6 +66,21 @@ $powered_on = $hue->getLightOnStatus($light_id); // True if on, false if off.
 Delete a light from the Bridge.
 ```php
 $hue->deleteLight($light_id);
+```
+Attempt to match a light to a color by hex (not all colors can be created by the light).
+```php
+# Set the light to Red.
+$hue->setLightToHex($light_id, '#ff0000');
+```
+Attempt to match a light to a color by RGB value (not all colors can be created by the light).
+```php
+# Set the light to Blue.
+$rgb = array(
+  'r' => 0,
+  'g' => 0,
+  'b' => 255
+);
+$hue->setLightToRGB($light_id, $rgb);
 ```
 
 #### Bridge Configuration Information
