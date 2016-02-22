@@ -127,6 +127,7 @@ class AlphaHue
     public function togglePower($light_id, $light_state='on')
     {
         $light_state = ('on' == $light_state); // on=true, off=false
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->put("lights/{$light_id}/state", json_encode(array('on'=>$light_state)));
         return $response;
     }
@@ -198,6 +199,7 @@ class AlphaHue
      */
     public function setLightState($light_id, $state)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->put("lights/{$light_id}/state", json_encode($state));
         return $response;
     }
@@ -247,6 +249,7 @@ class AlphaHue
      */
     public function setLightAttributes($light_id, $attributes)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->put("lights/{$light_id}", json_encode($attributes));
         return $response;
     }
@@ -260,6 +263,7 @@ class AlphaHue
      */
     public function deleteLight($light_id)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->delete("lights/{$light_id}");
         return $response;
     }
@@ -327,6 +331,7 @@ class AlphaHue
         // Make sure the light IDs are sent over as strings or the API with throw an error.
         $params['lights'] = array_map('strval', $lights);
 
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->post('groups', json_encode($params));
         return $response;
     }
@@ -345,6 +350,7 @@ class AlphaHue
      */
     public function setGroupAttributes($group_id, $attributes)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->put("groups/{$group_id}", json_encode($attributes));
         return $response;
     }
@@ -358,6 +364,7 @@ class AlphaHue
      */
     public function deleteGroup($group_id)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->delete("groups/{$group_id}");
         return $response;
     }
@@ -392,6 +399,7 @@ class AlphaHue
      */
     public function setGroupState($group_id, $state)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->put("groups/{$group_id}/action", json_encode($state));
         return $response;
     }
@@ -440,6 +448,7 @@ class AlphaHue
      */
     public function deleteRule($rule_id)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->get("rules/{$rule_id}");
         return $response;
     }
@@ -472,6 +481,7 @@ class AlphaHue
         $params['conditions'] = $conditions;
         $params['actions'] = $actions;
 
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->post('rules', json_encode($params));
         return $response;
     }
@@ -500,6 +510,7 @@ class AlphaHue
      */
     public function updateRule($rule_id, $attributes)
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->put("rules/{$rule_id}", json_encode($attributes));
         return $response;
     }
@@ -541,6 +552,7 @@ class AlphaHue
          *                                 Either 'POST', 'PUT', 'DELETE' for local addresses.
          * $arguments['command']->body;    JSON string to be sent to the relevant resource.
          */
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->post("schedules", json_encode($attributes));
         return $response;
     }
@@ -586,6 +598,7 @@ class AlphaHue
          *                                 Either 'POST', 'PUT', 'DELETE' for local addresses.
          * $arguments['command']->body;    JSON string to be sent to the relevant resource.
          */
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->post("schedules", $attributes);
         return $response;
     }
@@ -597,6 +610,7 @@ class AlphaHue
      */
     public function deleteSchedule()
     {
+        usleep(250000); // Commands can't go to the bridge too fast. 
         $response = $this->rest->delete("schedules/{$schedule_id}");
         return $response;
     }
