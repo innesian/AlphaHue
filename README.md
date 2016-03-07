@@ -82,7 +82,54 @@ $rgb = array(
 );
 $hue->setLightToRGB($light_id, $rgb);
 ```
+Get or set the state of a light.
+```php
+# Get the state of light 1
+$state = $hue->getLightState(1);
 
+# Sets the light state to a Red, max brightness.
+$red = $hue->getXYPointFromHex('#ff0000');
+$lightAttributes = array(
+  'on'  => true,
+  'bri' => 254, // max brightness is 254
+  'xy'  => $red
+);
+$hue->setLightState(1, $lightAttributes);
+```
+#### Groups API
+Get group IDs associated to the Bridge.
+```php
+$group_ids = $hue->getGroups();
+```
+Create a group.
+```php
+# Create a group titled 'New Group'
+$response = $hue->createGroup('New Group');
+```
+Set the attributes of a group.
+```php
+# Change group 1 name and set lights 1 and 2 to be the group members.
+$attributes = array(
+  'name'  => 'New Group Name',
+  'lights => array(1, 2),
+);
+$hue->setGroupAttributes(1, $attributes);
+```
+Delete a group.
+```php
+# Delete group 1.
+$hue->deleteGroup(1);
+```
+Set the state of a group.
+```php
+$red = $hue->getXYPointFromHex('#ff0000');
+$groupAttributes = array(
+  'on'  => true,
+  'bri' => 254, // max brightness is 254
+  'xy'  => $red
+);
+$hue->setGroupState(1, $groupAttributes);
+```
 #### Bridge Configuration Information
 ```php
 $hue->config['name']; // Bridge Name.
@@ -90,4 +137,3 @@ $hue->config['apiversion']; // Bridge API Version.
 $hue->config['ipaddress']; // Bridge IP Address
 ```
 #### 
-
