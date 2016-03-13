@@ -111,7 +111,7 @@ Set the attributes of a group.
 # Change group 1 name and set lights 1 and 2 to be the group members.
 $attributes = array(
   'name'  => 'New Group Name',
-  'lights => array(1, 2),
+  'lights' => array(1, 2),
 );
 $hue->setGroupAttributes(1, $attributes);
 ```
@@ -129,6 +129,20 @@ $groupAttributes = array(
   'xy'  => $red
 );
 $hue->setGroupState(1, $groupAttributes);
+```
+#### Rules API
+Get rules.
+```php
+# Get list of rules stored in the bridge.
+$rules = $hue->getRules();
+
+# Get rule with a rule ID of 1.
+$rule = $hue->getRule(1);
+```
+Delete a rule.
+```php
+# Delete a rule with ID 1.
+$hue->deleteRule(1);
 ```
 #### Bridge Configuration Information
 ```php
