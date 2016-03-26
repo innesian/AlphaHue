@@ -144,6 +144,17 @@ Delete a rule.
 # Delete a rule with ID 1.
 $hue->deleteRule(1);
 ```
+#### Sensors API
+```php
+# Get an array of all sensor information.
+$sensors = $hue->getSensors();
+```
+#### Schedule API
+Get all schedules.
+```php
+# Get schedules.
+$schedules = $hue->getSchedules();
+```
 #### Bridge Configuration Information
 ```php
 $hue->config['name']; // Bridge Name.
