@@ -44,7 +44,7 @@ Create a *composer.json* file in your project and add `adam-innes/alpha-hue` as 
 * Follow the directions on obtaining a username from the [documentation](http://www.developers.meethue.com/documentation/getting-started).
 
 ### Connecting from a remote server
-If you're connecting to your bridge from an external server you may need to forward a port via your router. There are security risks associated with this you should consider. If your project is not a personal one but an app or some software intended for use by other people with their light systems you should request the remote API access from Phillips directly.
+If you're connecting to your bridge from an external server you may need to forward a port via your router. There are security risks associated with this that you should consider. If your project is not a personal one but an app or some software intended for use by other people with their light systems you should request the remote API access from Phillips directly.
 * *Step 1*: [Determine the internal IP address of your Bridge](http://www.meethue.com/api/nupnp).
 * *Step 2*: [Forward an unused port to the internal IP address of the Bridge](https://www.noip.com/support/knowledgebase/general-port-forwarding-guide/)
 * After forwarding (for example, port 24055, to the Bridge) your *Bridge Hostname* would be [yourIpAddress:24055](https://www.google.com/search?q=what+is+my+ip&oq=what+is+my+ip)
