@@ -39,7 +39,7 @@ class AlphaHue
     ];
 
     private Curl $curl;
-    private array $config;
+    private $config;
     private string $baseUrl;
 
     /**
