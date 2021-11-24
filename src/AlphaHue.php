@@ -1,17 +1,22 @@
-<?php namespace AlphaHue;
+<?php
+
+namespace AlphaHue;
+
+use Curl\Curl;
+use ErrorException;
 
 class AlphaHue
 {
     use LightColors;
 
-    /** @var string $bridge_address Hostname of the bridge. **/
-    public $bridge_address = '';
+    /** @var string $bridge_address Hostname of the bridge. * */
+    public string $bridge_address = '';
 
-    /** @var string $bridge_username Username registered with bridge. **/
-    public $bridge_username = '';
+    /** @var string $bridge_username Username registered with bridge. * */
+    public string $bridge_username = '';
 
-    /** @var array $room_classes Allowed room classes for Groups of the type 'Room'. **/
-    public $room_classes = array(
+    /** @var array $room_classes Allowed room classes for Groups of the type 'Room'. * */
+    public array $room_classes = [
         'Living room',
         'Kitchen',
         'Dining',
@@ -31,7 +36,11 @@ class AlphaHue
         'Driveway',
         'Carport',
         'Other'
-    );
+    ];
+
+    private Curl $curl;
+    private $config;
+    private string $baseUrl;
 
     /**
      * Initializes class with Bridge Address and Username.
@@ -40,28 +49,30 @@ class AlphaHue
      *
      * @param string $bridge_address  Host (and optionally port) of the Bridge.
      * @param string $bridge_username Username retrieved from the Bridge through authentication.
+     * @throws ErrorException
      *
      * @return void
      */
     public function __construct($bridge_address, $bridge_username)
     {
-        $this->bridge_address  = $bridge_address;
+        $this->bridge_address = $bridge_address;
         $this->bridge_username = $bridge_username;
 
-        // Initialize the Rest Client.
-        $this->rest = new \PhpRestClient\PhpRestClient("http://{$bridge_address}/api/{$bridge_username}");
+        $this->baseUrl = "http://{$bridge_address}/api/{$bridge_username}/";
+
+        $this->curl = new Curl($this->baseUrl );
+        $this->curl->setDefaultJsonDecoder($assoc = true);
+        $this->curl->setHeader('Content-Type', 'application/json');
 
         $this->getConfiguration();
     }
-    
+
     /**
      * Returns a registered username with the Bridge.
      *
      * Before connecting to the Bridge and running commands we need to get authorized. Hold the
-     * button down on the bridge and execute this function from a script to generate a username. 
+     * button down on the bridge and execute this function from a script to generate a username.
      * The Bridge Username is required to instantiate this class.
-     *
-     * @uses \PhpRestClient\PhpRestClient
      *
      * @param $bridge_address
      * @param $app_name
@@ -69,11 +80,14 @@ class AlphaHue
      *
      * @return mixed Array response from the server or false on failure.
      */
-    public static function authorize($bridge_address, $app_name='AlphaHue', $device_name='myServer')
+    public static function authorize($bridge_address, $app_name = 'AlphaHue', $device_name = 'myServer')
     {
-        $rest = new \PhpRestClient\PhpRestClient("http://{$bridge_address}/api");
-        $response = $rest->post('', json_encode(array('devicetype'=>"{$app_name}:{$device_name}")));
-        return $response;
+        $curl = new Curl("http://{$bridge_address}/api");
+        $curl->setDefaultJsonDecoder($assoc = true);
+        $curl->setHeader('Content-Type', 'application/json');
+        $curl->post('', ['devicetype' => "{$app_name}:{$device_name}"]);
+
+        return $curl->response;
     }
 
     /**
@@ -83,7 +97,7 @@ class AlphaHue
      */
     public function getConfiguration()
     {
-        $response = $this->rest->get('config');
+        $response = $this->curl->get($this->baseUrl. 'config');
         $this->config = $response;
     }
 
@@ -108,8 +122,7 @@ class AlphaHue
      */
     public function getTimezones()
     {
-        $response = $this->rest->get('info/timezones');
-        return $response;
+        return $this->curl->get('info/timezones');
     }
 
     /**
@@ -120,9 +133,8 @@ class AlphaHue
      *
      * @return bool True if compatible with parameters, false if not.
      */
-    public function compatible($min_version, $max_version=false)
+    public function compatible($min_version, $max_version = false)
     {
-        $compatible = false;
         $compatible = version_compare($this->config['apiversion'], $min_version, '>=');
         if ($compatible && $max_version) {
             $compatible = version_compare($this->config['apiversion'], $max_version, '<=');
@@ -138,22 +150,29 @@ class AlphaHue
      *
      * @return void
      */
-    public function togglePower($light_id, $light_state='on')
+    public function togglePower($light_id, $light_state = 'on')
     {
         $light_state = ('on' == $light_state); // on=true, off=false
         $this->throttle();
-        $response = $this->rest->put("lights/{$light_id}/state", json_encode(array('on'=>$light_state)));
-        return $response;
+
+        $this->curl->put($this->baseUrl. "lights/{$light_id}/state",
+            json_encode([
+                'on' => $light_state
+                ]
+            )
+        );
+
+        return $this->curl->response;
     }
 
     /**
      * Gets all IDs associated with lights attached to the Bridge.
-     * 
+     *
      * @return mixed Array of light IDs or boolean false on failure.
      */
     public function getLightIds()
     {
-        $response = $this->rest->get('lights');
+        $response = $this->curl->get($this->baseUrl. 'lights');
         return array_keys($response);
     }
 
@@ -166,7 +185,7 @@ class AlphaHue
      */
     public function getLightOnStatus($light_id)
     {
-        $response = $this->rest->get("lights/{$light_id}");
+        $response = $this->curl->get($this->baseUrl. "lights/{$light_id}");
         return $response['state']['on'];
     }
 
@@ -179,14 +198,13 @@ class AlphaHue
      */
     public function getLightState($light_id)
     {
-        $response = $this->rest->get("lights/{$light_id}");
-        return $response;
+        return $this->curl->get($this->baseUrl. "lights/{$light_id}");
     }
 
     /**
      * Modifies the state of a specified light.
      *
-     * @param int   $light_id   Light Identifier. 
+     * @param int   $light_id   Light Identifier.
      * @param array $attributes { // All attributes are optional.
      *     @var bool   $on      On/Off state of the light. True=On, False=Off.
      *     @var int    $bri     The brightness value to set the light to. (0 to 254).
@@ -214,8 +232,7 @@ class AlphaHue
     public function setLightState($light_id, $state)
     {
         $this->throttle();
-        $response = $this->rest->put("lights/{$light_id}/state", json_encode($state));
-        return $response;
+        return $this->curl->put($this->baseUrl. "lights/{$light_id}/state", json_encode($state));
     }
 
     /**
@@ -229,8 +246,7 @@ class AlphaHue
     public function setLightToHex($light_id, $hex)
     {
         $xy = $this->getXYPointFromHex($hex);
-        $response = $this->setLightState($light_id, array('xy'=>$xy));
-        return $response;
+        return $this->setLightState($light_id, ['xy' => $xy]);
     }
 
     /**
@@ -247,8 +263,7 @@ class AlphaHue
     public function setLightToRGB($light_id, $rgb)
     {
         $xy = $this->getXYPointFromRGB($rgb);
-        $response = $this->setLightState($light_id, array('xy'=>$xy));
-        return $response;
+        return $this->setLightState($light_id, ['xy' => $xy]);
     }
 
     /**
@@ -264,8 +279,7 @@ class AlphaHue
     public function setLightAttributes($light_id, $attributes)
     {
         $this->throttle();
-        $response = $this->rest->put("lights/{$light_id}", json_encode($attributes));
-        return $response;
+        return $this->curl->put($this->baseUrl. "lights/{$light_id}", json_encode($attributes));
     }
 
     /**
@@ -278,8 +292,7 @@ class AlphaHue
     public function deleteLight($light_id)
     {
         $this->throttle();
-        $response = $this->rest->delete("lights/{$light_id}");
-        return $response;
+        return $this->curl->delete($this->baseUrl. "lights/{$light_id}");
     }
 
     /**
@@ -289,19 +302,17 @@ class AlphaHue
      */
     public function searchNewDevices()
     {
-        $response = $this->rest->post('lights');
-        return $response;
+        return $this->curl->post($this->baseUrl. 'lights');
     }
 
     /**
      * Get all Group IDs associated to the Bridge.
      *
-     * @return mixed Array of Groups or false on failure. 
+     * @return mixed Array of Groups or false on failure.
      */
     public function getGroups()
     {
-        $response = $this->rest->get('groups');
-        return $response;
+        return $this->curl->get($this->baseUrl. 'groups');
     }
 
     /**
@@ -313,7 +324,7 @@ class AlphaHue
      *
      * @return mixed Array response on success, false on failure.
      */
-    public function createGroup($name, array $lights, $type='LightGroup', $room_class='Other')
+    public function createGroup($name, array $lights, $type = 'LightGroup', $room_class = 'Other')
     {
         $params['name'] = $name;
 
@@ -329,7 +340,7 @@ class AlphaHue
              * 3: A Room isn't automatically deleted when all lights in it are.
              *
              * Created Room groups are given a default Room Class of 'Other' unless specified,
-             * There is a set list of acceptable Room Classes. 
+             * There is a set list of acceptable Room Classes.
              *
              * @see AlphaHue::$room_classes for list of acceptable classes.
              * @see http://developers.meethue.com/documentation/groups-api#21_get_all_groups
@@ -346,8 +357,7 @@ class AlphaHue
         $params['lights'] = array_map('strval', $lights);
 
         $this->throttle();
-        $response = $this->rest->post('groups', json_encode($params));
-        return $response;
+        return $this->curl->post($this->baseUrl. 'groups', json_encode($params));
     }
 
     /**
@@ -365,8 +375,7 @@ class AlphaHue
     public function setGroupAttributes($group_id, $attributes)
     {
         $this->throttle();
-        $response = $this->rest->put("groups/{$group_id}", json_encode($attributes));
-        return $response;
+        return $this->curl->put($this->baseUrl. "groups/{$group_id}", json_encode($attributes));
     }
 
     /**
@@ -379,8 +388,7 @@ class AlphaHue
     public function deleteGroup($group_id)
     {
         $this->throttle();
-        $response = $this->rest->delete("groups/{$group_id}");
-        return $response;
+        return $this->curl->delete($this->baseUrl. "groups/{$group_id}");
     }
 
     /**
@@ -390,7 +398,7 @@ class AlphaHue
      * @param array $attributes { // All attributes are optional.
      *     @var bool   $on      On/Off state of the light. True=On, False=Off.
      *     @var int    $bri     The brightness value to set the light to. (0 to 254).
-     *     @var int    $hue     The hue value to set light to. (0 to 65535).  
+     *     @var int    $hue     The hue value to set light to. (0 to 65535).
      *     @var int    $sat     Saturation of the light. 254 is most saturated (colored) 0 is white.
      *     @var float  $xy      [x,y] coordinates of a color in CIE color space.
      *     @var int    $ct      The Mired Color temperature of the light. (153 to 500).
@@ -414,8 +422,7 @@ class AlphaHue
     public function setGroupState($group_id, $state)
     {
         $this->throttle();
-        $response = $this->rest->put("groups/{$group_id}/action", json_encode($state));
-        return $response;
+        return $this->curl->put($this->baseUrl. "groups/{$group_id}/action", json_encode($state));
     }
 
     /**
@@ -425,8 +432,7 @@ class AlphaHue
      */
     public function getSensors()
     {
-        $response = $this->rest->get('sensors');
-        return $response;
+        return $this->curl->get($this->baseUrl. 'sensors');
     }
 
     /**
@@ -436,8 +442,7 @@ class AlphaHue
      */
     public function getRules()
     {
-        $response = $this->rest->get('rules');
-        return $response;
+        return $this->curl->get($this->baseUrl. 'rules');
     }
 
     /**
@@ -449,9 +454,8 @@ class AlphaHue
      */
     public function getRule($rule_id)
     {
-        $reponse = $this->rest->get("rules/{$rule_id}");
-        return $response;
-    }  
+        return $this->curl->get($this->baseUrl. "rules/{$rule_id}");
+    }
 
     /**
      * Delete a rule with specified ID.
@@ -463,61 +467,59 @@ class AlphaHue
     public function deleteRule($rule_id)
     {
         $this->throttle();
-        $response = $this->rest->get("rules/{$rule_id}");
-        return $response;
+        return $this->curl->get($this->baseUrl. "rules/{$rule_id}");
     }
 
     /**
      * Creates a new rule.
      *
-     * Creates a new rule in the bridge rule engine. A rule must contain at least 1 condition (max 8) 
+     * Creates a new rule in the bridge rule engine. A rule must contain at least 1 condition (max 8)
      * and at least 1 action (max 8). All conditions must evaluate to true for the action to be performed.
      *
      * @param string $name      Rule name.
      * @param array $conditions {
      *     @var string $address  Path to an attribute of a sensor resource.
-     *     @var string $operator eq, gt, lt, dx (equals, greater than, less than or value has changed). 
+     *     @var string $operator eq, gt, lt, dx (equals, greater than, less than or value has changed).
      *     @var string $value    The resource attribute is compared to this value using the given operator.
      *                           The value is cast to the data type of the resource attribute.
      * }
      * @param array $action {
      *     @var string $address  Path to an attribute of a sensor resource.
      *     @var string $method   The HTTP method used to send the body to the given address POST,PUT,DELETE for
-     *                           local addresses. 
-     *     @var string $body     JSON string to be sent to the relevant resource. 
+     *                           local addresses.
+     *     @var string $body     JSON string to be sent to the relevant resource.
      * }
      *
      * @return mixed Confirmation array on success.
      */
-    public function createRule($name, $conditions, $action)
+    public function createRule($name, $conditions, $actions)
     {
         $params['name'] = $name;
         $params['conditions'] = $conditions;
         $params['actions'] = $actions;
 
         $this->throttle();
-        $response = $this->rest->post('rules', json_encode($params));
-        return $response;
+        return $this->curl->post($this->baseUrl. 'rules', json_encode($params));
     }
 
     /**
      * Creates a new rule.
      *
-     * Creates a new rule in the bridge rule engine. A rule must contain at least 1 condition (max 8) 
+     * Creates a new rule in the bridge rule engine. A rule must contain at least 1 condition (max 8)
      * and at least 1 action (max 8). All conditions must evaluate to true for the action to be performed.
      *
      * @param int   $rule_id Rule identifier.
      * @param array $attributes['conditions'] {
      *     @var string $address  Path to an attribute of a sensor resource.
-     *     @var string $operator eq, gt, lt, dx (equals, greater than, less than or value has changed). 
+     *     @var string $operator eq, gt, lt, dx (equals, greater than, less than or value has changed).
      *     @var string $value    The resource attribute is compared to this value using the given operator.
      *                           The value is cast to the data type of the resource attribute.
      * }
      * @param array $attributes['action'] {
      *     @var string $address  Path to an attribute of a sensor resource.
      *     @var string $method   The HTTP method used to send the body to the given address POST,PUT,DELETE for
-     *                           local addresses. 
-     *     @var string $body     JSON string to be sent to the relevant resource. 
+     *                           local addresses.
+     *     @var string $body     JSON string to be sent to the relevant resource.
      * }
      *
      * @return mixed Confirmation array on success.
@@ -525,8 +527,7 @@ class AlphaHue
     public function updateRule($rule_id, $attributes)
     {
         $this->throttle();
-        $response = $this->rest->put("rules/{$rule_id}", json_encode($attributes));
-        return $response;
+        return $this->curl->put($this->baseUrl. "rules/{$rule_id}", json_encode($attributes));
     }
 
     /**
@@ -534,10 +535,9 @@ class AlphaHue
      *
      * @return mixed Confirmation array on success.
      */
-    public function getSchedules() 
+    public function getSchedules()
     {
-        $response = $this->rest->get("schedules");
-        return $response;
+        return $this->curl->get($this->baseUrl. "schedules");
     }
 
     /**
@@ -567,23 +567,21 @@ class AlphaHue
          * $arguments['command']->body;    JSON string to be sent to the relevant resource.
          */
         $this->throttle();
-        $response = $this->rest->post("schedules", json_encode($attributes));
-        return $response;
+        return $this->curl->post($this->baseUrl. "schedules", json_encode($attributes));
     }
 
     /**
      * Gets all attributes for a schedule.
      *
      * @param int $schedule_id Schedule Identifier.
-     * 
+     *
      * @see AlphaHue::createScehdule() Attributes array in documentation is same as response.
      *
      * @return mixed Attribute array on succcess.
      */
     public function getSchedule($schedule_id)
     {
-        $response = $this->rest->get("schedules/{$schedule_id}");
-        return $response;
+        return $this->curl->get($this->baseUrl. "schedules/{$schedule_id}");
     }
 
     /**
@@ -603,7 +601,7 @@ class AlphaHue
      *
      * @return mixed Confirmation array on success.
      */
-    public function setSchedule($schedule_id, $attributes)
+    public function setSchedule($attributes)
     {
         /**
          * $arguments['command']->address; Path to light resource, a group resource or any other
@@ -613,19 +611,18 @@ class AlphaHue
          * $arguments['command']->body;    JSON string to be sent to the relevant resource.
          */
         $this->throttle();
-        $response = $this->rest->post("schedules", $attributes);
-        return $response;
+        return $this->curl->post($this->baseUrl. "schedules", $attributes);
     }
 
     /**
      * Deletes a schedule from the bridge.
      *
+     * @param $schedule_id
      * @return mixed Confirmation array on success.
      */
-    public function deleteSchedule()
+    public function deleteSchedule($schedule_id)
     {
         $this->throttle();
-        $response = $this->rest->delete("schedules/{$schedule_id}");
-        return $response;
+        return $this->curl->delete($this->baseUrl. "schedules/{$schedule_id}");
     }
 }
